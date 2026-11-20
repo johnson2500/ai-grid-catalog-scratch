@@ -3,7 +3,8 @@ kind: LLMInferenceService
 metadata:
   annotations:
     ai-grid/clusters: ""
-    ai-grid/version: "1"
+    ai-grid/version: "2"
+    test: catalog-only
   labels:
     ai-grid/model: catalog-smoke-1
     app.kubernetes.io/managed-by: ai-grid-provider-backend
