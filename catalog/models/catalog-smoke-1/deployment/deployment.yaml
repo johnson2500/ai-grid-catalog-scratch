@@ -1,0 +1,52 @@
+apiVersion: serving.kserve.io/v1alpha2
+kind: LLMInferenceService
+metadata:
+  annotations:
+    ai-grid/clusters: ""
+    ai-grid/version: "1"
+  labels:
+    ai-grid/model: catalog-smoke-1
+    app.kubernetes.io/managed-by: ai-grid-provider-backend
+  name: catalog-smoke-1
+  namespace: ai-grid-internal-models
+spec:
+  baseRefs:
+  - name: vllm-multinode
+  model:
+    name: catalog-smoke-1
+    uri: oci://registry.stage.redhat.io/rhelai1/modelcar-granite-3-1-8b-lab-v2-2:1.5
+  replicas: 1
+  router:
+    gateway:
+      refs:
+      - name: openshift-ai-inference
+        namespace: openshift-ingress
+    route: {}
+  template:
+    containers:
+    - name: main
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    ai-grid/model: catalog-smoke-1
+    app.kubernetes.io/managed-by: ai-grid-provider-backend
+  name: catalog-smoke-1-grid
+  namespace: ai-grid-internal-models
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: redhat-ai-grid
+    ports:
+    - port: 8000
+      protocol: TCP
+    - port: 9090
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: catalog-smoke-1
+  policyTypes:
+  - Ingress
